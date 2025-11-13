@@ -1,21 +1,65 @@
 # 🚀 srv-fale-com-jesus
 
-Microsserviço desenvolvido com Spring Boot e integrado com as pipelines de infraestrutura.
+Microsserviço base desenvolvido com Spring Boot, arquitetura hexagonal e integrado com as pipelines de infraestrutura.
 
 ## 📋 Tecnologias
 
 - **Java 17**
 - **Spring Boot 3.2.0**
-- **SQL Server 2022**
-- **Flyway** (Migrations)
+- **SQL Server 2022** (via db-propagno)
 - **Docker** & **Docker Compose**
 - **GitHub Actions** (CI/CD)
+- **Arquitetura Hexagonal** (Ports and Adapters)
+
+## 🚀 Quick Start
+
+### Setup Automatizado (Recomendado)
+
+```bash
+# Execute o script de setup
+./scripts/setup.sh        # Linux/Mac
+.\scripts\setup.ps1       # Windows
+```
+
+O script irá:
+- ✅ Verificar pré-requisitos
+- ✅ Criar arquivo .env.dev
+- ✅ Verificar conectividade com banco
+- ✅ Fazer build do projeto
+
+📖 **Guia completo:** Veja [QUICKSTART.md](QUICKSTART.md)
+
+### Setup Manual
+
+1. **Clone e configure:**
+```bash
+git clone git@github.com:propagno/srv-fale-com-jesus.git
+cd srv-fale-com-jesus
+cp .env.example .env.dev
+# Edite .env.dev com suas configurações
+```
+
+2. **Inicie o banco de dados:**
+```bash
+cd ../db-propagno
+./scripts/init.sh dev
+```
+
+3. **Execute a aplicação:**
+```bash
+cd srv-fale-com-jesus
+docker-compose -f docker-compose.dev.yml up -d
+# ou
+./mvnw spring-boot:run
+```
+
+4. **Acesse:**
+- Swagger: http://localhost:8080/swagger-ui/index.html
+- Health: http://localhost:8080/actuator/health
 
 ## 🏗️ Arquitetura
 
 Este projeto utiliza **Arquitetura Hexagonal** (Ports and Adapters).
-
-### Estrutura de Camadas
 
 ```
 src/main/java/br/com/propagno/falecomjesus/
@@ -38,98 +82,62 @@ src/main/java/br/com/propagno/falecomjesus/
     └── input/rest/          # Controllers REST
 ```
 
-📖 Veja [ARCHITECTURE.md](ARCHITECTURE.md) para detalhes completos da arquitetura.
-
-## 🚀 Como Executar Localmente
-
-### Pré-requisitos
-
-- Java 17+
-- Maven 3.8+
-- Docker & Docker Compose
-
-### Opção 1: Docker Compose (Recomendado)
-
-```bash
-# Iniciar ambiente completo (app + banco)
-docker-compose -f docker-compose.dev.yml up -d
-
-# Ver logs
-docker-compose -f docker-compose.dev.yml logs -f app-dev
-
-# Parar
-docker-compose -f docker-compose.dev.yml down
-```
-
-### Opção 2: Maven Direto
-
-```bash
-# Executar aplicação
-./mvnw spring-boot:run
-
-# Ou
-mvn spring-boot:run
-```
+📖 **Detalhes:** Veja [ARCHITECTURE.md](ARCHITECTURE.md)
 
 ## 🗄️ Banco de Dados
 
-### Conexão via SQL Server Management Studio
+O banco de dados é gerenciado pelo repositório **db-propagno**.
 
-- **Server:** `localhost,1433`
-- **Authentication:** SQL Server Authentication
-- **Login:** `sa`
-- **Password:** `YourStrong@Passw0rd` (ou valor de `DB_PASSWORD_DEV`)
+**Conexão:**
+- Host: `db-dev` (Docker) ou `localhost` (externo)
+- Porta: `1433` (dev), `1434` (staging), `1435` (prod)
+- Database: `propagno_db`
+- User: `sa`
+- Password: Configurada em `.env.dev`
 
-### Migrations
-
-As migrations são executadas automaticamente via Flyway na inicialização da aplicação.
-
-Localização: `src/main/resources/db/migration/`
+📖 **Detalhes:** Veja [DATABASE-CONNECTION.md](DATABASE-CONNECTION.md)
 
 ## 🔄 CI/CD
 
-O projeto está configurado com workflows GitHub Actions:
+### Workflows Disponíveis
 
 - **PR Check:** Validação em Pull Requests
+  - Testes
+  - Build
+  - Validação de coverage (>= 70%)
+  - Validação de secrets
+  - Validação de .env files
+
 - **CI/CD Development:** Deploy automático em `develop`
 - **CI/CD Staging:** Deploy em `staging` ou `release/*`
 - **CI/CD Production:** Deploy em `main`
 
-### Workflows Reutilizáveis
+### Validações Automáticas
 
-Os workflows utilizam os templates reutilizáveis do repositório de infraestrutura.
+- ✅ Dependabot para atualizações de dependências
+- ✅ CodeQL para análise de segurança
+- ✅ Validação de secrets em PRs
+- ✅ Validação de coverage de testes
+- ✅ Validação de documentação
 
-## 📝 Endpoints
+## 📝 Desenvolvimento
 
-- **Health Check (Actuator):** `http://localhost:8080/actuator/health`
-- **API Health:** `http://localhost:8080/api/v1/health`
-- **Examples API:**
-  - `GET /api/v1/examples` - Listar todos
-  - `GET /api/v1/examples/{id}` - Buscar por ID
-  - `POST /api/v1/examples` - Criar novo
-  - `DELETE /api/v1/examples/{id}` - Remover
-- **Swagger UI:** `http://localhost:8080/swagger-ui/index.html`
-- **API Docs:** `http://localhost:8080/v3/api-docs`
+### Checklist Antes de PR
 
-## 🔧 Configuração
+Consulte [CHECKLIST-DESENVOLVEDOR.md](CHECKLIST-DESENVOLVEDOR.md) para garantir que seu PR está completo.
 
-### Variáveis de Ambiente
+### Convenção de Commits
 
-Crie um arquivo `.env.dev` (opcional):
-
-```env
-DB_PASSWORD_DEV=YourStrong@Passw0rd
-DB_HOST=localhost
-DB_PORT=1433
-DB_NAME=srv_fale_com_jesus
-DB_USERNAME=sa
+```
+feat: adiciona nova funcionalidade
+fix: corrige bug
+docs: atualiza documentação
+refactor: refatora código
+test: adiciona testes
+chore: manutenção
 ```
 
-### Application Properties
-
-As configurações estão em `src/main/resources/application.yml`
-
-## 🧪 Testes
+### Testes
 
 ```bash
 # Executar testes
@@ -137,42 +145,43 @@ As configurações estão em `src/main/resources/application.yml`
 
 # Com coverage
 ./mvnw test jacoco:report
+
+# Verificar coverage (deve ser >= 70%)
+./mvnw jacoco:check
 ```
 
-## 📦 Build
+## 🐛 Troubleshooting
 
-```bash
-# Build da aplicação
-./mvnw clean package
+Consulte [TROUBLESHOOTING.md](TROUBLESHOOTING.md) para resolução de problemas comuns.
 
-# Build da imagem Docker
-docker build -t srv-fale-com-jesus:latest -f docker/Dockerfile .
-```
+## 📚 Documentação
 
-## 🚀 Deploy
+- **[QUICKSTART.md](QUICKSTART.md)** - Início rápido
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Arquitetura hexagonal
+- **[DATABASE-CONNECTION.md](DATABASE-CONNECTION.md)** - Conexão com banco
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Guia de contribuição
+- **[CHECKLIST-DESENVOLVEDOR.md](CHECKLIST-DESENVOLVEDOR.md)** - Checklist para PRs
+- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Resolução de problemas
+- **[DEPLOY-INFO.md](DEPLOY-INFO.md)** - Informações sobre deploy
+- **[REFINAMENTO-TECNICO.md](REFINAMENTO-TECNICO.md)** - Análise técnica
+- **[RESUMO-REFINAMENTO.md](RESUMO-REFINAMENTO.md)** - Resumo das melhorias
 
-### Development
+## 🔒 Segurança
 
-```bash
-# Push para branch develop
-git push origin develop
+- ✅ Dependabot configurado
+- ✅ CodeQL scanning ativo
+- ✅ Validação de secrets em PRs
+- ✅ Pre-commit hooks para validação
+- ✅ Coverage mínimo de 70%
 
-# O workflow GitHub Actions fará:
-# 1. Build
-# 2. Testes
-# 3. Build Docker image
-# 4. Push para registry
-# 5. Deploy (se configurado)
-```
+## 🎯 Próximos Passos
 
-## 📚 Próximos Passos
-
-1. Implementar suas funcionalidades
-2. Adicionar testes
-3. Configurar deploy real (Kubernetes, etc.)
-4. Adicionar monitoramento e logs
+1. Execute o setup: `./scripts/setup.sh`
+2. Leia o [QUICKSTART.md](QUICKSTART.md)
+3. Desenvolva suas features
+4. Siga o [CHECKLIST-DESENVOLVEDOR.md](CHECKLIST-DESENVOLVEDOR.md)
+5. Crie seu PR!
 
 ---
 
-**Desenvolvido com ❤️ usando as pipelines de infraestrutura**
-
+**Desenvolvido com ❤️ usando as pipelines de infraestrutura Propagno** 🚀
