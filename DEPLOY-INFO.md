@@ -50,7 +50,7 @@ docker-compose -f docker-compose.dev.yml up -d
 ```
 
 **Acesso:**
-- Swagger: `http://localhost:8080/swagger-ui.html`
+- Swagger: `http://localhost:8080/swagger-ui/index.html`
 - Health: `http://localhost:8080/actuator/health`
 - API: `http://localhost:8080/api/v1/health`
 
@@ -79,7 +79,7 @@ docker-compose -f docker-compose.dev.yml up -d
 ```
 
 **Acesso:**
-- `http://<IP-DO-SERVIDOR>:8080/swagger-ui.html`
+- `http://<IP-DO-SERVIDOR>:8080/swagger-ui/index.html`
 
 ### Opção 3: Kubernetes (K8s)
 

@@ -108,7 +108,7 @@ Os workflows utilizam os templates reutilizáveis do repositório de infraestrut
   - `GET /api/v1/examples/{id}` - Buscar por ID
   - `POST /api/v1/examples` - Criar novo
   - `DELETE /api/v1/examples/{id}` - Remover
-- **Swagger UI:** `http://localhost:8080/swagger-ui.html`
+- **Swagger UI:** `http://localhost:8080/swagger-ui/index.html`
 - **API Docs:** `http://localhost:8080/v3/api-docs`
 
 ## 🔧 Configuração

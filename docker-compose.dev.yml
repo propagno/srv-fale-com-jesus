@@ -10,25 +10,19 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=dev
-      - SPRING_DATASOURCE_URL=jdbc:sqlserver://db-dev:1433;databaseName=srv_fale_com_jesus;encrypt=true;trustServerCertificate=true
-      - SPRING_DATASOURCE_USERNAME=sa
+      # Conecta ao banco de dados externo (db-propagno)
+      # Use 'db-dev' como hostname quando estiver na mesma network Docker
+      - SPRING_DATASOURCE_URL=jdbc:sqlserver://${DB_HOST:-db-dev}:${DB_PORT:-1433};databaseName=${DB_NAME:-propagno_db};encrypt=true;trustServerCertificate=true
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-sa}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD_DEV:-YourStrong@Passw0rd}
-      - DB_PASSWORD=${DB_PASSWORD_DEV:-YourStrong@Passw0rd}
       - JAVA_OPTS=-Xmx512m -Xms256m
     volumes:
       - ./src:/app/src
       - maven-cache:/root/.m2
-      - ./docker/wait-for-db.sh:/wait-for-db.sh
-    depends_on:
-      - db-dev
-    entrypoint:
-      [
-        "/bin/bash",
-        "-c",
-        "chmod +x /wait-for-db.sh && /wait-for-db.sh && rm -rf ~/.m2/repository/org/flywaydb/flyway-database-sqlserver && ./mvnw clean spring-boot:run -U || mvn clean spring-boot:run -U",
-      ]
     networks:
       - dev-network
+      # Conecta à network do banco de dados (se estiver rodando no mesmo host)
+      - db-propagno-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
@@ -37,30 +31,7 @@ services:
       retries: 3
       start_period: 40s
 
-  db-dev:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: db-dev
-    environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=${DB_PASSWORD_DEV:-YourStrong@Passw0rd}
-      - MSSQL_PID=Developer
-    ports:
-      - "1433:1433"
-    volumes:
-      - db-dev-data:/var/opt/mssql
-    networks:
-      - dev-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql/bin/sqlservr --help || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 60s
-
 volumes:
-  db-dev-data:
-    driver: local
   maven-cache:
     driver: local
 
@@ -68,3 +39,7 @@ networks:
   dev-network:
     driver: bridge
     name: srv-fale-com-jesus-dev-network
+  # Network externa do banco de dados (deve existir no db-propagno)
+  db-propagno-network:
+    external: true
+    name: db-propagno-network
