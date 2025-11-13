@@ -100,13 +100,23 @@ class ExampleRequestTest {
                 .name("Different")
                 .description("Desc")
                 .build();
+        
+        ExampleRequest request4 = ExampleRequest.builder()
+                .name("Test")
+                .description("Different")
+                .build();
+        
+        ExampleRequest request5 = new ExampleRequest(); // null values
 
         // Then
         assertEquals(request1, request2);
         assertEquals(request1.hashCode(), request2.hashCode());
         assertNotEquals(request1, request3);
+        assertNotEquals(request1, request4);
+        assertNotEquals(request1, request5);
         assertNotEquals(request1, null);
         assertNotEquals(request1, new Object());
+        assertEquals(request1, request1); // reflexivo
     }
 
     @Test

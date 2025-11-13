@@ -157,13 +157,35 @@ class ExampleEntityJpaTest {
                 .createdAt(now)
                 .updatedAt(now)
                 .build();
+        
+        ExampleEntityJpa entity4 = ExampleEntityJpa.builder()
+                .id(1L)
+                .name("Different")
+                .description("Desc")
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+        
+        ExampleEntityJpa entity5 = ExampleEntityJpa.builder()
+                .id(1L)
+                .name("Test")
+                .description("Different")
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+        
+        ExampleEntityJpa entity6 = new ExampleEntityJpa(); // null values
 
         // Then
         assertEquals(entity1, entity2);
         assertEquals(entity1.hashCode(), entity2.hashCode());
         assertNotEquals(entity1, entity3);
+        assertNotEquals(entity1, entity4);
+        assertNotEquals(entity1, entity5);
+        assertNotEquals(entity1, entity6);
         assertNotEquals(entity1, null);
         assertNotEquals(entity1, new Object());
+        assertEquals(entity1, entity1); // reflexivo
     }
 
     @Test

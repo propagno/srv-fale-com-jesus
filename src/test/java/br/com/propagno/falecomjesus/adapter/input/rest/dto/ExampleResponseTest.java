@@ -127,13 +127,26 @@ class ExampleResponseTest {
                 .createdAt(now)
                 .updatedAt(now)
                 .build();
+        
+        ExampleResponse response4 = ExampleResponse.builder()
+                .id(1L)
+                .name("Different")
+                .description("Desc")
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+        
+        ExampleResponse response5 = new ExampleResponse(); // null values
 
         // Then
         assertEquals(response1, response2);
         assertEquals(response1.hashCode(), response2.hashCode());
         assertNotEquals(response1, response3);
+        assertNotEquals(response1, response4);
+        assertNotEquals(response1, response5);
         assertNotEquals(response1, null);
         assertNotEquals(response1, new Object());
+        assertEquals(response1, response1); // reflexivo
     }
 
     @Test

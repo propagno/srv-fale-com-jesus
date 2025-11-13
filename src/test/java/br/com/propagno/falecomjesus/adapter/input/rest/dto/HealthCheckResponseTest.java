@@ -96,13 +96,31 @@ class HealthCheckResponseTest {
                 .service("srv-fale-com-jesus")
                 .version("1.0.0")
                 .build();
+        
+        HealthCheckResponse response4 = HealthCheckResponse.builder()
+                .status("UP")
+                .service("different-service")
+                .version("1.0.0")
+                .build();
+        
+        HealthCheckResponse response5 = HealthCheckResponse.builder()
+                .status("UP")
+                .service("srv-fale-com-jesus")
+                .version("2.0.0")
+                .build();
+        
+        HealthCheckResponse response6 = new HealthCheckResponse(); // null values
 
         // Then
         assertEquals(response1, response2);
         assertEquals(response1.hashCode(), response2.hashCode());
         assertNotEquals(response1, response3);
+        assertNotEquals(response1, response4);
+        assertNotEquals(response1, response5);
+        assertNotEquals(response1, response6);
         assertNotEquals(response1, null);
         assertNotEquals(response1, new Object());
+        assertEquals(response1, response1); // reflexivo
     }
 
     @Test

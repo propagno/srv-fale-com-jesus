@@ -96,13 +96,31 @@ class HealthCheckDTOTest {
                 .service("srv-fale-com-jesus")
                 .version("1.0.0")
                 .build();
+        
+        HealthCheckDTO dto4 = HealthCheckDTO.builder()
+                .status("UP")
+                .service("different-service")
+                .version("1.0.0")
+                .build();
+        
+        HealthCheckDTO dto5 = HealthCheckDTO.builder()
+                .status("UP")
+                .service("srv-fale-com-jesus")
+                .version("2.0.0")
+                .build();
+        
+        HealthCheckDTO dto6 = new HealthCheckDTO(); // null values
 
         // Then
         assertEquals(dto1, dto2);
         assertEquals(dto1.hashCode(), dto2.hashCode());
         assertNotEquals(dto1, dto3);
+        assertNotEquals(dto1, dto4);
+        assertNotEquals(dto1, dto5);
+        assertNotEquals(dto1, dto6);
         assertNotEquals(dto1, null);
         assertNotEquals(dto1, new Object());
+        assertEquals(dto1, dto1); // reflexivo
     }
 
     @Test
