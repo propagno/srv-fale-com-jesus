@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Instala dependências do sistema
 RUN apt-get update && \
-    apt-get install -y curl && \
+    apt-get install -y curl maven && \
     rm -rf /var/lib/apt/lists/*
 
 # Copia arquivos do projeto
@@ -14,6 +14,7 @@ COPY . .
 # Expõe porta
 EXPOSE 8080
 
-# Comando para desenvolvimento (hot reload se configurado)
-CMD ["./mvnw", "spring-boot:run"]
+# Comando para desenvolvimento
+# Tenta usar mvnw, se não existir usa maven do sistema
+CMD if [ -f "./mvnw" ]; then ./mvnw spring-boot:run; else mvn spring-boot:run; fi
 
