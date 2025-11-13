@@ -51,9 +51,10 @@ class ExampleEntityJpaTest {
         // Then
         assertNotNull(entity.getCreatedAt());
         assertNotNull(entity.getUpdatedAt());
-        // Verifica que os timestamps são iguais (com tolerância de 1 segundo para diferenças de nanosegundos)
-        assertTrue(Math.abs(entity.getCreatedAt().getNano() - entity.getUpdatedAt().getNano()) < 1_000_000_000);
-        assertEquals(entity.getCreatedAt().getSecond(), entity.getUpdatedAt().getSecond());
+        // Verifica que os timestamps são iguais (com tolerância para diferenças de nanosegundos)
+        // Compara apenas segundos e minutos, ignorando nanosegundos
+        assertEquals(entity.getCreatedAt().truncatedTo(java.time.temporal.ChronoUnit.SECONDS),
+                entity.getUpdatedAt().truncatedTo(java.time.temporal.ChronoUnit.SECONDS));
     }
 
     @Test

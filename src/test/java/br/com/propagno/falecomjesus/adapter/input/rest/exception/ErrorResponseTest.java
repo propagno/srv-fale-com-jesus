@@ -16,8 +16,8 @@ class ErrorResponseTest {
         // Then
         assertNotNull(response);
         assertNull(response.getTimestamp());
-        // Status é Integer, então pode ser null ou 0 (valor padrão)
-        assertTrue(response.getStatus() == null || response.getStatus() == 0);
+        // Status é int (primitivo), então valor padrão é 0
+        assertEquals(0, response.getStatus());
         assertNull(response.getError());
         assertNull(response.getMessage());
     }
