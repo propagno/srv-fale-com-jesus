@@ -20,6 +20,10 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
     name: Build Application
@@ -49,6 +53,20 @@ jobs:
 
       - name: Run tests
         run: mvn clean test
+
+      - name: Check code coverage
+        run: mvn jacoco:report
+
+      - name: Check coverage threshold
+        run: |
+          # Verifica se a cobertura está acima de 70%
+          if mvn jacoco:check -Djacoco.minLineCoverage=0.70 -Djacoco.minBranchCoverage=0.70; then
+            echo "✅ Cobertura de testes OK (>= 70%)"
+          else
+            echo "❌ Cobertura de testes abaixo de 70%"
+            echo "Build bloqueado: cobertura insuficiente"
+            exit 1
+          fi
 
       - name: Run integration tests
         run: mvn verify -DskipUnitTests
@@ -114,6 +132,9 @@ jobs:
     name: Deploy to Staging
     needs: [build, security-scan]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      statuses: write
     environment:
       name: staging
       url: http://staging.example.com

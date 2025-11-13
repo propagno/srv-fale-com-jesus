@@ -8,15 +8,16 @@ services:
       - "8082:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      - SPRING_DATASOURCE_URL=jdbc:sqlserver://db-prod:1433;databaseName=app_db_prod;encrypt=true;trustServerCertificate=true
-      - SPRING_DATASOURCE_USERNAME=sa
+      # Conecta ao banco de dados externo (db-propagno)
+      # Use 'db-prod' como hostname quando estiver na mesma network Docker
+      - SPRING_DATASOURCE_URL=jdbc:sqlserver://${DB_HOST:-db-prod}:${DB_PORT:-1433};databaseName=${DB_NAME:-propagno_db_prod};encrypt=true;trustServerCertificate=true
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-sa}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD_PROD}
       - JAVA_OPTS=-Xmx2048m -Xms1024m
-    depends_on:
-      db-prod:
-        condition: service_healthy
     networks:
       - prod-network
+      # Conecta à network do banco de dados (se estiver rodando no mesmo host)
+      - db-propagno-network
     restart: always
     deploy:
       resources:
@@ -32,35 +33,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-
-  db-prod:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: db-prod
-    environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=${DB_PASSWORD_PROD}
-      - MSSQL_PID=Enterprise
-    ports:
-      - "1435:1433"
-    volumes:
-      - db-prod-data:/var/opt/mssql
-    networks:
-      - prod-network
-    restart: always
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 2G
-        reservations:
-          cpus: '1'
-          memory: 1G
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${DB_PASSWORD_PROD} -Q 'SELECT 1' || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
 
   redis-prod:
     image: redis:7-alpine
@@ -85,8 +57,6 @@ services:
       retries: 5
 
 volumes:
-  db-prod-data:
-    driver: local
   redis-prod-data:
     driver: local
 
@@ -94,3 +64,7 @@ networks:
   prod-network:
     driver: bridge
     name: app-prod-network
+  # Network externa do banco de dados (deve existir no db-propagno)
+  db-propagno-network:
+    external: true
+    name: db-propagno-network

@@ -17,27 +17,30 @@ on:
 
 env:
     ENVIRONMENT: dev
-    REGISTRY: ghcr.io
-    IMAGE_NAME: ${{ github.repository }}
+
+permissions:
+    contents: read
+    packages: write
 
 jobs:
     build:
         name: Build and Push Image
-        uses: ./.github/workflows/reusable/build-and-push.yaml
+        uses: ./.github/workflows/build-and-push-reusable.yaml
         with:
             java-version: "17"
-            registry: ${{ env.REGISTRY }}
-            image-name: ${{ env.IMAGE_NAME }}
+            registry: ghcr.io
+            image-name: ${{ github.repository }}
             dockerfile-path: ./docker/Dockerfile
             package-name: ${{ github.event.repository.name }}
             tag-suffix: dev-latest
-        secrets:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     deploy:
         name: Deploy to Development
         needs: build
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            statuses: write
         environment:
             name: development
             url: http://dev.example.com

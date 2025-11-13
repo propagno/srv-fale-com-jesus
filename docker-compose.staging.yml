@@ -8,15 +8,16 @@ services:
       - "8081:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=staging
-      - SPRING_DATASOURCE_URL=jdbc:sqlserver://db-staging:1433;databaseName=app_db_staging;encrypt=true;trustServerCertificate=true
-      - SPRING_DATASOURCE_USERNAME=sa
+      # Conecta ao banco de dados externo (db-propagno)
+      # Use 'db-staging' como hostname quando estiver na mesma network Docker
+      - SPRING_DATASOURCE_URL=jdbc:sqlserver://${DB_HOST:-db-staging}:${DB_PORT:-1433};databaseName=${DB_NAME:-propagno_db_staging};encrypt=true;trustServerCertificate=true
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-sa}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD_STAGING}
       - JAVA_OPTS=-Xmx1024m -Xms512m
-    depends_on:
-      db-staging:
-        condition: service_healthy
     networks:
       - staging-network
+      # Conecta à network do banco de dados (se estiver rodando no mesmo host)
+      - db-propagno-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
@@ -24,27 +25,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-
-  db-staging:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: db-staging
-    environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=${DB_PASSWORD_STAGING}
-      - MSSQL_PID=Standard
-    ports:
-      - "1434:1433"
-    volumes:
-      - db-staging-data:/var/opt/mssql
-    networks:
-      - staging-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${DB_PASSWORD_STAGING} -Q 'SELECT 1' || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 30s
 
   redis-staging:
     image: redis:7-alpine
@@ -64,8 +44,6 @@ services:
       retries: 5
 
 volumes:
-  db-staging-data:
-    driver: local
   redis-staging-data:
     driver: local
 
@@ -73,3 +51,7 @@ networks:
   staging-network:
     driver: bridge
     name: app-staging-network
+  # Network externa do banco de dados (deve existir no db-propagno)
+  db-propagno-network:
+    external: true
+    name: db-propagno-network

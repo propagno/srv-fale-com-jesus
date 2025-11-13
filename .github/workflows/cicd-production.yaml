@@ -26,6 +26,10 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
     name: Build Application
@@ -56,6 +60,22 @@ jobs:
       - name: Run tests
         if: ${{ !inputs.skip-tests }}
         run: mvn clean test
+
+      - name: Check code coverage
+        if: ${{ !inputs.skip-tests }}
+        run: mvn jacoco:report
+
+      - name: Check coverage threshold
+        if: ${{ !inputs.skip-tests }}
+        run: |
+          # Verifica se a cobertura está acima de 70%
+          if mvn jacoco:check -Djacoco.minLineCoverage=0.70 -Djacoco.minBranchCoverage=0.70; then
+            echo "✅ Cobertura de testes OK (>= 70%)"
+          else
+            echo "❌ Cobertura de testes abaixo de 70%"
+            echo "Build bloqueado: cobertura insuficiente"
+            exit 1
+          fi
 
       - name: Run integration tests
         if: ${{ !inputs.skip-tests }}
@@ -124,6 +144,9 @@ jobs:
     name: Deploy to Production
     needs: [build, security-scan]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      statuses: write
     environment:
       name: production
       url: http://prod.example.com
