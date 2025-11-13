@@ -45,5 +45,35 @@ class HealthCheckDTOTest {
         assertEquals("srv-fale-com-jesus", dto.getService());
         assertEquals("1.0.0", dto.getVersion());
     }
+
+    @Test
+    void shouldSetAndGetAllProperties() {
+        // Given
+        HealthCheckDTO dto = new HealthCheckDTO();
+
+        // When
+        dto.setStatus("DOWN");
+        dto.setService("test-service");
+        dto.setVersion("2.0.0");
+
+        // Then
+        assertEquals("DOWN", dto.getStatus());
+        assertEquals("test-service", dto.getService());
+        assertEquals("2.0.0", dto.getVersion());
+    }
+
+    @Test
+    void shouldCreateWithBuilderPartial() {
+        // When
+        HealthCheckDTO dto = HealthCheckDTO.builder()
+                .status("UP")
+                .build();
+
+        // Then
+        assertNotNull(dto);
+        assertEquals("UP", dto.getStatus());
+        assertNull(dto.getService());
+        assertNull(dto.getVersion());
+    }
 }
 

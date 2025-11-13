@@ -58,5 +58,41 @@ class ErrorResponseTest {
         assertEquals("Not Found", response.getError());
         assertEquals("Entity not found", response.getMessage());
     }
+
+    @Test
+    void shouldCreateWithBuilderPartial() {
+        // Given
+        LocalDateTime now = LocalDateTime.now();
+
+        // When - testa builder com alguns campos
+        ErrorResponse response = ErrorResponse.builder()
+                .status(500)
+                .error("Internal Error")
+                .build();
+
+        // Then
+        assertNotNull(response);
+        assertEquals(500, response.getStatus());
+        assertEquals("Internal Error", response.getError());
+    }
+
+    @Test
+    void shouldSetAndGetAllProperties() {
+        // Given
+        ErrorResponse response = new ErrorResponse();
+        LocalDateTime now = LocalDateTime.now();
+
+        // When
+        response.setTimestamp(now);
+        response.setStatus(400);
+        response.setError("Bad Request");
+        response.setMessage("Invalid input");
+
+        // Then
+        assertEquals(now, response.getTimestamp());
+        assertEquals(400, response.getStatus());
+        assertEquals("Bad Request", response.getError());
+        assertEquals("Invalid input", response.getMessage());
+    }
 }
 

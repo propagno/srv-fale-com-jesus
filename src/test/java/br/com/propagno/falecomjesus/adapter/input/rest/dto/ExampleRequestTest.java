@@ -55,5 +55,32 @@ class ExampleRequestTest {
         assertEquals("Test Name", request.getName());
         assertEquals("Test Description", request.getDescription());
     }
+
+    @Test
+    void shouldCreateWithBuilderPartial() {
+        // When
+        ExampleRequest request = ExampleRequest.builder()
+                .name("Only Name")
+                .build();
+
+        // Then
+        assertNotNull(request);
+        assertEquals("Only Name", request.getName());
+        assertNull(request.getDescription());
+    }
+
+    @Test
+    void shouldHandleNullValues() {
+        // Given
+        ExampleRequest request = new ExampleRequest();
+
+        // When
+        request.setName(null);
+        request.setDescription(null);
+
+        // Then
+        assertNull(request.getName());
+        assertNull(request.getDescription());
+    }
 }
 

@@ -44,6 +44,9 @@ class ExampleEntityJpaTest {
         // Given
         ExampleEntityJpa entity = new ExampleEntityJpa();
         entity.setName("Test Name");
+        // Garante que os timestamps estão null antes
+        assertNull(entity.getCreatedAt());
+        assertNull(entity.getUpdatedAt());
 
         // When
         entity.onCreate();
@@ -55,6 +58,25 @@ class ExampleEntityJpaTest {
         // Compara apenas segundos e minutos, ignorando nanosegundos
         assertEquals(entity.getCreatedAt().truncatedTo(java.time.temporal.ChronoUnit.SECONDS),
                 entity.getUpdatedAt().truncatedTo(java.time.temporal.ChronoUnit.SECONDS));
+    }
+
+    @Test
+    void shouldSetTimestampsOnCreateWhenAlreadySet() {
+        // Given
+        ExampleEntityJpa entity = new ExampleEntityJpa();
+        LocalDateTime existingTime = LocalDateTime.now().minusDays(1);
+        entity.setCreatedAt(existingTime);
+        entity.setUpdatedAt(existingTime);
+
+        // When
+        entity.onCreate();
+
+        // Then
+        // onCreate deve sobrescrever os timestamps existentes
+        assertNotNull(entity.getCreatedAt());
+        assertNotNull(entity.getUpdatedAt());
+        assertTrue(entity.getCreatedAt().isAfter(existingTime));
+        assertTrue(entity.getUpdatedAt().isAfter(existingTime));
     }
 
     @Test

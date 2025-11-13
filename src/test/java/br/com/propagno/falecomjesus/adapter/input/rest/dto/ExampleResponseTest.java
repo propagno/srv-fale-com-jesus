@@ -61,5 +61,43 @@ class ExampleResponseTest {
         assertEquals(now, response.getCreatedAt());
         assertEquals(now, response.getUpdatedAt());
     }
+
+    @Test
+    void shouldSetAndGetAllProperties() {
+        // Given
+        ExampleResponse response = new ExampleResponse();
+        LocalDateTime now = LocalDateTime.now();
+
+        // When
+        response.setId(2L);
+        response.setName("Updated Name");
+        response.setDescription("Updated Description");
+        response.setCreatedAt(now);
+        response.setUpdatedAt(now);
+
+        // Then
+        assertEquals(2L, response.getId());
+        assertEquals("Updated Name", response.getName());
+        assertEquals("Updated Description", response.getDescription());
+        assertEquals(now, response.getCreatedAt());
+        assertEquals(now, response.getUpdatedAt());
+    }
+
+    @Test
+    void shouldCreateWithBuilderPartial() {
+        // When
+        ExampleResponse response = ExampleResponse.builder()
+                .id(3L)
+                .name("Partial")
+                .build();
+
+        // Then
+        assertNotNull(response);
+        assertEquals(3L, response.getId());
+        assertEquals("Partial", response.getName());
+        assertNull(response.getDescription());
+        assertNull(response.getCreatedAt());
+        assertNull(response.getUpdatedAt());
+    }
 }
 

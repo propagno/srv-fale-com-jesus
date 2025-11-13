@@ -45,5 +45,35 @@ class HealthCheckResponseTest {
         assertEquals("srv-fale-com-jesus", response.getService());
         assertEquals("1.0.0", response.getVersion());
     }
+
+    @Test
+    void shouldSetAndGetAllProperties() {
+        // Given
+        HealthCheckResponse response = new HealthCheckResponse();
+
+        // When
+        response.setStatus("DOWN");
+        response.setService("test-service");
+        response.setVersion("2.0.0");
+
+        // Then
+        assertEquals("DOWN", response.getStatus());
+        assertEquals("test-service", response.getService());
+        assertEquals("2.0.0", response.getVersion());
+    }
+
+    @Test
+    void shouldCreateWithBuilderPartial() {
+        // When
+        HealthCheckResponse response = HealthCheckResponse.builder()
+                .status("UP")
+                .build();
+
+        // Then
+        assertNotNull(response);
+        assertEquals("UP", response.getStatus());
+        assertNull(response.getService());
+        assertNull(response.getVersion());
+    }
 }
 
