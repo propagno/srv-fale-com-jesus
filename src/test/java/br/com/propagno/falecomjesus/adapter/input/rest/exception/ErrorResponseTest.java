@@ -174,5 +174,57 @@ class ErrorResponseTest {
         assertNotNull(toString);
         assertTrue(toString.contains("404") || toString.contains("status=404"));
     }
+
+    @Test
+    void shouldTestEqualsWithNullFields() {
+        // Given - testa diferentes combinações de null
+        ErrorResponse response1 = new ErrorResponse();
+        ErrorResponse response2 = new ErrorResponse();
+        ErrorResponse response3 = ErrorResponse.builder().status(404).build();
+        ErrorResponse response4 = ErrorResponse.builder().error("Error").build();
+        ErrorResponse response5 = ErrorResponse.builder().message("Message").build();
+        LocalDateTime now = LocalDateTime.now();
+        ErrorResponse response6 = ErrorResponse.builder().timestamp(now).build();
+
+        // Then
+        assertEquals(response1, response2); // ambos null
+        assertNotEquals(response1, response3); // um null, outro não
+        assertNotEquals(response1, response4);
+        assertNotEquals(response1, response5);
+        assertNotEquals(response1, response6);
+        assertNotEquals(response3, response4);
+        assertNotEquals(response3, response5);
+        assertNotEquals(response3, response6);
+    }
+
+    @Test
+    void shouldTestEqualsWithPartialNulls() {
+        // Given - testa quando alguns campos são null
+        LocalDateTime now = LocalDateTime.now();
+        ErrorResponse response1 = ErrorResponse.builder()
+                .timestamp(now)
+                .status(404)
+                .error(null)
+                .message(null)
+                .build();
+        
+        ErrorResponse response2 = ErrorResponse.builder()
+                .timestamp(now)
+                .status(404)
+                .error(null)
+                .message(null)
+                .build();
+        
+        ErrorResponse response3 = ErrorResponse.builder()
+                .timestamp(now)
+                .status(404)
+                .error("Error")
+                .message(null)
+                .build();
+
+        // Then
+        assertEquals(response1, response2);
+        assertNotEquals(response1, response3);
+    }
 }
 

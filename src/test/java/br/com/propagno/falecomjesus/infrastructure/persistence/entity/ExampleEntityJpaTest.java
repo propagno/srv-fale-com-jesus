@@ -207,5 +207,78 @@ class ExampleEntityJpaTest {
         assertNotNull(toString);
         assertTrue(toString.contains("1") || toString.contains("id=1"));
     }
+
+    @Test
+    void shouldTestEqualsWithNullFields() {
+        // Given - testa diferentes combinações de null
+        ExampleEntityJpa entity1 = new ExampleEntityJpa();
+        ExampleEntityJpa entity2 = new ExampleEntityJpa();
+        ExampleEntityJpa entity3 = ExampleEntityJpa.builder().id(1L).build();
+        ExampleEntityJpa entity4 = ExampleEntityJpa.builder().name("Test").build();
+
+        // Then
+        assertEquals(entity1, entity2); // ambos null
+        assertNotEquals(entity1, entity3); // um null, outro não
+        assertNotEquals(entity1, entity4);
+        assertNotEquals(entity3, entity4);
+    }
+
+    @Test
+    void shouldTestEqualsWithPartialNulls() {
+        // Given - testa quando alguns campos são null
+        LocalDateTime now = LocalDateTime.now();
+        ExampleEntityJpa entity1 = ExampleEntityJpa.builder()
+                .id(1L)
+                .name("Test")
+                .description(null)
+                .createdAt(null)
+                .updatedAt(null)
+                .build();
+        
+        ExampleEntityJpa entity2 = ExampleEntityJpa.builder()
+                .id(1L)
+                .name("Test")
+                .description(null)
+                .createdAt(null)
+                .updatedAt(null)
+                .build();
+        
+        ExampleEntityJpa entity3 = ExampleEntityJpa.builder()
+                .id(1L)
+                .name("Test")
+                .description("Desc")
+                .createdAt(null)
+                .updatedAt(null)
+                .build();
+
+        // Then
+        assertEquals(entity1, entity2);
+        assertNotEquals(entity1, entity3);
+    }
+
+    @Test
+    void shouldTestEqualsWithDifferentTimestamps() {
+        // Given - testa equals com timestamps diferentes
+        LocalDateTime now1 = LocalDateTime.now();
+        LocalDateTime now2 = now1.plusHours(1);
+        ExampleEntityJpa entity1 = ExampleEntityJpa.builder()
+                .id(1L)
+                .name("Test")
+                .description("Desc")
+                .createdAt(now1)
+                .updatedAt(now1)
+                .build();
+        
+        ExampleEntityJpa entity2 = ExampleEntityJpa.builder()
+                .id(1L)
+                .name("Test")
+                .description("Desc")
+                .createdAt(now2)
+                .updatedAt(now2)
+                .build();
+
+        // Then
+        assertNotEquals(entity1, entity2); // timestamps diferentes
+    }
 }
 

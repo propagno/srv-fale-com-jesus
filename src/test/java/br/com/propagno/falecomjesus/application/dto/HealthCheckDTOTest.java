@@ -141,5 +141,50 @@ class HealthCheckDTOTest {
         assertTrue(toString.contains("srv-fale-com-jesus"));
         assertTrue(toString.contains("1.0.0"));
     }
+
+    @Test
+    void shouldTestEqualsWithNullFields() {
+        // Given - testa diferentes combinações de null
+        HealthCheckDTO dto1 = new HealthCheckDTO();
+        HealthCheckDTO dto2 = new HealthCheckDTO();
+        HealthCheckDTO dto3 = HealthCheckDTO.builder().status("UP").build();
+        HealthCheckDTO dto4 = HealthCheckDTO.builder().service("test").build();
+        HealthCheckDTO dto5 = HealthCheckDTO.builder().version("1.0").build();
+
+        // Then
+        assertEquals(dto1, dto2); // ambos null
+        assertNotEquals(dto1, dto3); // um null, outro não
+        assertNotEquals(dto1, dto4);
+        assertNotEquals(dto1, dto5);
+        assertNotEquals(dto3, dto4);
+        assertNotEquals(dto3, dto5);
+        assertNotEquals(dto4, dto5);
+    }
+
+    @Test
+    void shouldTestEqualsWithPartialNulls() {
+        // Given - testa quando alguns campos são null
+        HealthCheckDTO dto1 = HealthCheckDTO.builder()
+                .status("UP")
+                .service(null)
+                .version(null)
+                .build();
+        
+        HealthCheckDTO dto2 = HealthCheckDTO.builder()
+                .status("UP")
+                .service(null)
+                .version(null)
+                .build();
+        
+        HealthCheckDTO dto3 = HealthCheckDTO.builder()
+                .status("UP")
+                .service("test")
+                .version(null)
+                .build();
+
+        // Then
+        assertEquals(dto1, dto2);
+        assertNotEquals(dto1, dto3);
+    }
 }
 

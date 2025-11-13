@@ -168,5 +168,53 @@ class ExampleResponseTest {
         assertNotNull(toString);
         assertTrue(toString.contains("1") || toString.contains("id=1"));
     }
+
+    @Test
+    void shouldTestEqualsWithNullFields() {
+        // Given - testa diferentes combinações de null
+        ExampleResponse response1 = new ExampleResponse();
+        ExampleResponse response2 = new ExampleResponse();
+        ExampleResponse response3 = ExampleResponse.builder().id(1L).build();
+        ExampleResponse response4 = ExampleResponse.builder().name("Test").build();
+
+        // Then
+        assertEquals(response1, response2); // ambos null
+        assertNotEquals(response1, response3); // um null, outro não
+        assertNotEquals(response1, response4);
+        assertNotEquals(response3, response4);
+    }
+
+    @Test
+    void shouldTestEqualsWithPartialNulls() {
+        // Given - testa quando alguns campos são null
+        LocalDateTime now = LocalDateTime.now();
+        ExampleResponse response1 = ExampleResponse.builder()
+                .id(1L)
+                .name("Test")
+                .description(null)
+                .createdAt(null)
+                .updatedAt(null)
+                .build();
+        
+        ExampleResponse response2 = ExampleResponse.builder()
+                .id(1L)
+                .name("Test")
+                .description(null)
+                .createdAt(null)
+                .updatedAt(null)
+                .build();
+        
+        ExampleResponse response3 = ExampleResponse.builder()
+                .id(1L)
+                .name("Test")
+                .description("Desc")
+                .createdAt(null)
+                .updatedAt(null)
+                .build();
+
+        // Then
+        assertEquals(response1, response2);
+        assertNotEquals(response1, response3);
+    }
 }
 

@@ -139,5 +139,46 @@ class HealthCheckResponseTest {
         assertNotNull(toString);
         assertTrue(toString.contains("UP") || toString.contains("status=UP"));
     }
+
+    @Test
+    void shouldTestEqualsWithNullFields() {
+        // Given - testa diferentes combinações de null
+        HealthCheckResponse response1 = new HealthCheckResponse();
+        HealthCheckResponse response2 = new HealthCheckResponse();
+        HealthCheckResponse response3 = HealthCheckResponse.builder().status("UP").build();
+        HealthCheckResponse response4 = HealthCheckResponse.builder().service("test").build();
+
+        // Then
+        assertEquals(response1, response2); // ambos null
+        assertNotEquals(response1, response3); // um null, outro não
+        assertNotEquals(response1, response4);
+        assertNotEquals(response3, response4);
+    }
+
+    @Test
+    void shouldTestEqualsWithPartialNulls() {
+        // Given - testa quando alguns campos são null
+        HealthCheckResponse response1 = HealthCheckResponse.builder()
+                .status("UP")
+                .service(null)
+                .version(null)
+                .build();
+        
+        HealthCheckResponse response2 = HealthCheckResponse.builder()
+                .status("UP")
+                .service(null)
+                .version(null)
+                .build();
+        
+        HealthCheckResponse response3 = HealthCheckResponse.builder()
+                .status("UP")
+                .service("test")
+                .version(null)
+                .build();
+
+        // Then
+        assertEquals(response1, response2);
+        assertNotEquals(response1, response3);
+    }
 }
 

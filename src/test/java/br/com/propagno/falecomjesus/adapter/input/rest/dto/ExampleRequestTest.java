@@ -134,5 +134,43 @@ class ExampleRequestTest {
         assertNotNull(toString);
         assertTrue(toString.contains("Test Name") || toString.contains("name=Test Name"));
     }
+
+    @Test
+    void shouldTestEqualsWithNullFields() {
+        // Given - testa diferentes combinações de null
+        ExampleRequest request1 = new ExampleRequest();
+        ExampleRequest request2 = new ExampleRequest();
+        ExampleRequest request3 = ExampleRequest.builder().name("Test").build();
+        ExampleRequest request4 = ExampleRequest.builder().description("Desc").build();
+
+        // Then
+        assertEquals(request1, request2); // ambos null
+        assertNotEquals(request1, request3); // um null, outro não
+        assertNotEquals(request1, request4);
+        assertNotEquals(request3, request4);
+    }
+
+    @Test
+    void shouldTestEqualsWithPartialNulls() {
+        // Given - testa quando alguns campos são null
+        ExampleRequest request1 = ExampleRequest.builder()
+                .name("Test")
+                .description(null)
+                .build();
+        
+        ExampleRequest request2 = ExampleRequest.builder()
+                .name("Test")
+                .description(null)
+                .build();
+        
+        ExampleRequest request3 = ExampleRequest.builder()
+                .name(null)
+                .description("Desc")
+                .build();
+
+        // Then
+        assertEquals(request1, request2);
+        assertNotEquals(request1, request3);
+    }
 }
 
