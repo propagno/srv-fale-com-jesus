@@ -21,5 +21,5 @@ for i in {1..60}; do
 done
 
 echo "Database connection check completed!"
-echo "Note: Database will be created by Flyway migrations if it doesn't exist."
+echo "Note: Database migrations are managed by db-propagno repository."
 

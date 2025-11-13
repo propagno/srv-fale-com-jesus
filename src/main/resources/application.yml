@@ -13,18 +13,12 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update  # Temporariamente update para criar tabelas automaticamente
-    show-sql: true
+      ddl-auto: validate  # Valida schema - migrations gerenciadas pelo db-propagno
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.SQLServerDialect
-        format_sql: true
-
-  flyway:
-    enabled: false  # Temporariamente desabilitado - Flyway 10.x não suporta SQL Server 16.0
-    # locations: classpath:db/migration
-    # baseline-on-migrate: true
-    # validate-on-migrate: true
+        format_sql: false
 
 server:
   port: ${SERVER_PORT:8080}
