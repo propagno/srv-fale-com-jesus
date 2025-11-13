@@ -1,0 +1,64 @@
+name: PR Check - Build and Test
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - develop
+      - main
+      - staging
+
+jobs:
+  test:
+    name: Run Tests
+    uses: ./.github/workflows/reusable/run-tests.yaml
+    with:
+      java-version: "17"
+
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: "maven"
+
+      - name: Build application
+        run: mvn clean package -DskipTests
+
+      - name: Check code coverage
+        run: mvn jacoco:report
+        continue-on-error: true
+
+      - name: Upload coverage reports
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: ./target/site/jacoco/jacoco.xml
+          fail_ci_if_error: false
+
+      - name: Build Docker image (test)
+        run: |
+          docker build -t app-test:${{ github.sha }} -f docker/Dockerfile .
+        if: success()
+
+      - name: Comment PR
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const status = '${{ job.status }}' === 'success' ? '✅' : '❌'
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## PR Check ${status}\n\nBuild e testes: ${status}`
+            })

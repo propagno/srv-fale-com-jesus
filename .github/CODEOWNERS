@@ -1,0 +1,12 @@
+# CODEOWNERS - Template genérico
+# Ajuste conforme sua organização
+
+# Todos os arquivos
+* @seu-usuario/seu-time
+
+# Workflows do GitHub Actions
+.github/workflows/ @seu-usuario/seu-time-devops
+
+# Configurações do GitHub
+.github/CODEOWNERS @seu-usuario/seu-time-admin
+

@@ -1,0 +1,55 @@
+name: Run Tests
+
+on:
+  workflow_call:
+    inputs:
+      java-version:
+        description: 'Java version'
+        required: false
+        type: string
+        default: '17'
+    outputs:
+      test-result:
+        description: 'Test execution result'
+        value: ${{ jobs.test.outputs.result }}
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    outputs:
+      result: ${{ steps.test-status.outputs.result }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ inputs.java-version }}
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Run tests
+        id: test-status
+        run: |
+          if mvn clean test; then
+            echo "result=success" >> $GITHUB_OUTPUT
+          else
+            echo "result=failure" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Generate test report
+        if: always()
+        run: mvn jacoco:report
+        continue-on-error: true
+

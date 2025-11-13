@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  app-dev:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+    container_name: srv-fale-com-jesus-dev
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_DATASOURCE_URL=jdbc:sqlserver://db-dev:1433;databaseName=srv_fale_com_jesus;encrypt=true;trustServerCertificate=true
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD_DEV:-YourStrong@Passw0rd}
+      - JAVA_OPTS=-Xmx512m -Xms256m
+    volumes:
+      - ./src:/app/src
+      - maven-cache:/root/.m2
+    depends_on:
+      db-dev:
+        condition: service_healthy
+    networks:
+      - dev-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  db-dev:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: db-dev
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${DB_PASSWORD_DEV:-YourStrong@Passw0rd}
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - db-dev-data:/var/opt/mssql
+    networks:
+      - dev-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${DB_PASSWORD_DEV:-YourStrong@Passw0rd} -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  db-dev-data:
+    driver: local
+  maven-cache:
+    driver: local
+
+networks:
+  dev-network:
+    driver: bridge
+    name: srv-fale-com-jesus-dev-network
