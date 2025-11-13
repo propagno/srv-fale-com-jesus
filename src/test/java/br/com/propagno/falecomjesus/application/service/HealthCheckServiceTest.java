@@ -3,26 +3,19 @@ package br.com.propagno.falecomjesus.application.service;
 import br.com.propagno.falecomjesus.application.dto.HealthCheckDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(SpringExtension.class)
-@TestPropertySource(properties = {
-        "spring.application.name=srv-fale-com-jesus",
-        "app.version=1.0.0-SNAPSHOT"
-})
 class HealthCheckServiceTest {
 
-    @InjectMocks
     private HealthCheckService healthCheckService;
 
     @BeforeEach
     void setUp() {
         healthCheckService = new HealthCheckService();
+        ReflectionTestUtils.setField(healthCheckService, "applicationName", "srv-fale-com-jesus");
+        ReflectionTestUtils.setField(healthCheckService, "version", "1.0.0-SNAPSHOT");
     }
 
     @Test
