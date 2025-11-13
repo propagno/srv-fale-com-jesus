@@ -6,14 +6,18 @@ WORKDIR /app
 # Copia apenas os arquivos necessários para build
 COPY pom.xml .
 COPY .mvn .mvn
-COPY mvnw .
+COPY mvnw* ./
 COPY src ./src
 
 # Dá permissão de execução ao mvnw
-RUN chmod +x mvnw
+RUN chmod +x mvnw || true
 
-# Build da aplicação
-RUN ./mvnw clean package -DskipTests
+# Build da aplicação usando Maven diretamente (mais confiável)
+RUN apt-get update && \
+    apt-get install -y maven && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    mvn clean package -DskipTests
 
 # Extrai as camadas do Spring Boot
 # O nome do JAR é definido no pom.xml (artifactId)
