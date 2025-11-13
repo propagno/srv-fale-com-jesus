@@ -18,6 +18,10 @@ on:
 env:
     ENVIRONMENT: dev
 
+permissions:
+    contents: read
+    packages: write
+
 jobs:
     build:
         name: Build and Push Image
