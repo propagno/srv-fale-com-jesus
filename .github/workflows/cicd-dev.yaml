@@ -29,8 +29,6 @@ jobs:
             dockerfile-path: ./docker/Dockerfile
             package-name: ${{ github.event.repository.name }}
             tag-suffix: dev-latest
-        secrets:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     deploy:
         name: Deploy to Development
