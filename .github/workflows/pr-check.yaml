@@ -145,23 +145,16 @@ jobs:
           distribution: "temurin"
           cache: "maven"
 
-      - name: Run tests with coverage
-        run: mvn clean test
-
-      - name: Generate coverage report
-        run: mvn jacoco:report
-
-      - name: Check coverage threshold
+      - name: Run tests with coverage and check threshold
         run: |
-          # Executa o check do JaCoCo usando a configuração do pom.xml
-          # O check precisa ser executado após o report ter sido gerado
-          if mvn jacoco:check; then
-            echo "✅ Cobertura de testes OK (>= 70%)"
-          else
+          # Executa testes, gera relatório e verifica cobertura em uma única execução
+          # O verify executa: test -> jacoco:report (via execução no pom.xml) -> jacoco:check (via execução no pom.xml)
+          mvn clean verify || {
             echo "❌ Cobertura de testes abaixo de 70%"
             echo "Por favor, adicione mais testes antes de fazer merge"
             exit 1
-          fi
+          }
+          echo "✅ Cobertura de testes OK (>= 70%)"
 
       - name: Build application
         run: mvn package -DskipTests
