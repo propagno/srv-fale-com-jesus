@@ -11,20 +11,34 @@ Microsserviço desenvolvido com Spring Boot e integrado com as pipelines de infr
 - **Docker** & **Docker Compose**
 - **GitHub Actions** (CI/CD)
 
-## 🏗️ Estrutura do Projeto
+## 🏗️ Arquitetura
+
+Este projeto utiliza **Arquitetura Hexagonal** (Ports and Adapters).
+
+### Estrutura de Camadas
 
 ```
-.
-├── .github/workflows/     # Workflows GitHub Actions
-├── docker/                # Dockerfiles
-├── src/
-│   ├── main/
-│   │   ├── java/         # Código fonte
-│   │   └── resources/    # Configurações e migrations
-│   └── test/             # Testes
-├── docker-compose.*.yml   # Compose files por ambiente
-└── pom.xml               # Maven
+src/main/java/br/com/propagno/falecomjesus/
+│
+├── domain/                    # NÚCLEO - Regras de Negócio
+│   ├── entity/               # Entidades de domínio
+│   └── exception/            # Exceções de domínio
+│
+├── application/              # CASOS DE USO
+│   ├── port/
+│   │   ├── input/           # Ports de entrada (interfaces)
+│   │   └── output/          # Ports de saída (interfaces)
+│   ├── service/             # Implementação dos casos de uso
+│   └── dto/                 # DTOs da camada de aplicação
+│
+├── infrastructure/           # ADAPTADORES DE SAÍDA
+│   └── persistence/         # Persistência (JPA, SQL Server)
+│
+└── adapter/                  # ADAPTADORES DE ENTRADA
+    └── input/rest/          # Controllers REST
 ```
+
+📖 Veja [ARCHITECTURE.md](ARCHITECTURE.md) para detalhes completos da arquitetura.
 
 ## 🚀 Como Executar Localmente
 
@@ -87,8 +101,13 @@ Os workflows utilizam os templates reutilizáveis do repositório de infraestrut
 
 ## 📝 Endpoints
 
-- **Health Check:** `http://localhost:8080/actuator/health`
+- **Health Check (Actuator):** `http://localhost:8080/actuator/health`
 - **API Health:** `http://localhost:8080/api/v1/health`
+- **Examples API:**
+  - `GET /api/v1/examples` - Listar todos
+  - `GET /api/v1/examples/{id}` - Buscar por ID
+  - `POST /api/v1/examples` - Criar novo
+  - `DELETE /api/v1/examples/{id}` - Remover
 - **Swagger UI:** `http://localhost:8080/swagger-ui.html`
 - **API Docs:** `http://localhost:8080/v3/api-docs`
 
