@@ -115,5 +115,75 @@ class ExampleEntityJpaTest {
         assertEquals(now, entity.getCreatedAt());
         assertEquals(now, entity.getUpdatedAt());
     }
+
+    @Test
+    void shouldUpdateTimestampOnUpdateWhenCreatedAtIsNull() {
+        // Given
+        ExampleEntityJpa entity = new ExampleEntityJpa();
+        entity.setName("Test");
+
+        // When
+        entity.onUpdate();
+
+        // Then
+        assertNotNull(entity.getUpdatedAt());
+        assertNull(entity.getCreatedAt());
+    }
+
+    @Test
+    void shouldTestEqualsAndHashCode() {
+        // Given
+        LocalDateTime now = LocalDateTime.now();
+        ExampleEntityJpa entity1 = ExampleEntityJpa.builder()
+                .id(1L)
+                .name("Test")
+                .description("Desc")
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+        
+        ExampleEntityJpa entity2 = ExampleEntityJpa.builder()
+                .id(1L)
+                .name("Test")
+                .description("Desc")
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+        
+        ExampleEntityJpa entity3 = ExampleEntityJpa.builder()
+                .id(2L)
+                .name("Test")
+                .description("Desc")
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+
+        // Then
+        assertEquals(entity1, entity2);
+        assertEquals(entity1.hashCode(), entity2.hashCode());
+        assertNotEquals(entity1, entity3);
+        assertNotEquals(entity1, null);
+        assertNotEquals(entity1, new Object());
+    }
+
+    @Test
+    void shouldTestToString() {
+        // Given
+        LocalDateTime now = LocalDateTime.now();
+        ExampleEntityJpa entity = ExampleEntityJpa.builder()
+                .id(1L)
+                .name("Test Name")
+                .description("Test Description")
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+
+        // When
+        String toString = entity.toString();
+
+        // Then
+        assertNotNull(toString);
+        assertTrue(toString.contains("1") || toString.contains("id=1"));
+    }
 }
 

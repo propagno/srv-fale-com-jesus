@@ -75,5 +75,53 @@ class HealthCheckDTOTest {
         assertNull(dto.getService());
         assertNull(dto.getVersion());
     }
+
+    @Test
+    void shouldTestEqualsAndHashCode() {
+        // Given
+        HealthCheckDTO dto1 = HealthCheckDTO.builder()
+                .status("UP")
+                .service("srv-fale-com-jesus")
+                .version("1.0.0")
+                .build();
+        
+        HealthCheckDTO dto2 = HealthCheckDTO.builder()
+                .status("UP")
+                .service("srv-fale-com-jesus")
+                .version("1.0.0")
+                .build();
+        
+        HealthCheckDTO dto3 = HealthCheckDTO.builder()
+                .status("DOWN")
+                .service("srv-fale-com-jesus")
+                .version("1.0.0")
+                .build();
+
+        // Then
+        assertEquals(dto1, dto2);
+        assertEquals(dto1.hashCode(), dto2.hashCode());
+        assertNotEquals(dto1, dto3);
+        assertNotEquals(dto1, null);
+        assertNotEquals(dto1, new Object());
+    }
+
+    @Test
+    void shouldTestToString() {
+        // Given
+        HealthCheckDTO dto = HealthCheckDTO.builder()
+                .status("UP")
+                .service("srv-fale-com-jesus")
+                .version("1.0.0")
+                .build();
+
+        // When
+        String toString = dto.toString();
+
+        // Then
+        assertNotNull(toString);
+        assertTrue(toString.contains("UP"));
+        assertTrue(toString.contains("srv-fale-com-jesus"));
+        assertTrue(toString.contains("1.0.0"));
+    }
 }
 

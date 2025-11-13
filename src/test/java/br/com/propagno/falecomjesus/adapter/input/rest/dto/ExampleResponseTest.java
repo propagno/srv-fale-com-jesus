@@ -99,5 +99,61 @@ class ExampleResponseTest {
         assertNull(response.getCreatedAt());
         assertNull(response.getUpdatedAt());
     }
+
+    @Test
+    void shouldTestEqualsAndHashCode() {
+        // Given
+        LocalDateTime now = LocalDateTime.now();
+        ExampleResponse response1 = ExampleResponse.builder()
+                .id(1L)
+                .name("Test")
+                .description("Desc")
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+        
+        ExampleResponse response2 = ExampleResponse.builder()
+                .id(1L)
+                .name("Test")
+                .description("Desc")
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+        
+        ExampleResponse response3 = ExampleResponse.builder()
+                .id(2L)
+                .name("Test")
+                .description("Desc")
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+
+        // Then
+        assertEquals(response1, response2);
+        assertEquals(response1.hashCode(), response2.hashCode());
+        assertNotEquals(response1, response3);
+        assertNotEquals(response1, null);
+        assertNotEquals(response1, new Object());
+    }
+
+    @Test
+    void shouldTestToString() {
+        // Given
+        LocalDateTime now = LocalDateTime.now();
+        ExampleResponse response = ExampleResponse.builder()
+                .id(1L)
+                .name("Test Name")
+                .description("Test Description")
+                .createdAt(now)
+                .updatedAt(now)
+                .build();
+
+        // When
+        String toString = response.toString();
+
+        // Then
+        assertNotNull(toString);
+        assertTrue(toString.contains("1") || toString.contains("id=1"));
+    }
 }
 

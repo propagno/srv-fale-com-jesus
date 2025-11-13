@@ -75,5 +75,51 @@ class HealthCheckResponseTest {
         assertNull(response.getService());
         assertNull(response.getVersion());
     }
+
+    @Test
+    void shouldTestEqualsAndHashCode() {
+        // Given
+        HealthCheckResponse response1 = HealthCheckResponse.builder()
+                .status("UP")
+                .service("srv-fale-com-jesus")
+                .version("1.0.0")
+                .build();
+        
+        HealthCheckResponse response2 = HealthCheckResponse.builder()
+                .status("UP")
+                .service("srv-fale-com-jesus")
+                .version("1.0.0")
+                .build();
+        
+        HealthCheckResponse response3 = HealthCheckResponse.builder()
+                .status("DOWN")
+                .service("srv-fale-com-jesus")
+                .version("1.0.0")
+                .build();
+
+        // Then
+        assertEquals(response1, response2);
+        assertEquals(response1.hashCode(), response2.hashCode());
+        assertNotEquals(response1, response3);
+        assertNotEquals(response1, null);
+        assertNotEquals(response1, new Object());
+    }
+
+    @Test
+    void shouldTestToString() {
+        // Given
+        HealthCheckResponse response = HealthCheckResponse.builder()
+                .status("UP")
+                .service("srv-fale-com-jesus")
+                .version("1.0.0")
+                .build();
+
+        // When
+        String toString = response.toString();
+
+        // Then
+        assertNotNull(toString);
+        assertTrue(toString.contains("UP") || toString.contains("status=UP"));
+    }
 }
 

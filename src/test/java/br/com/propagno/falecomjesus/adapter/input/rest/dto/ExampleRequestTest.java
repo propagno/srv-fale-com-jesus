@@ -82,5 +82,47 @@ class ExampleRequestTest {
         assertNull(request.getName());
         assertNull(request.getDescription());
     }
+
+    @Test
+    void shouldTestEqualsAndHashCode() {
+        // Given
+        ExampleRequest request1 = ExampleRequest.builder()
+                .name("Test")
+                .description("Desc")
+                .build();
+        
+        ExampleRequest request2 = ExampleRequest.builder()
+                .name("Test")
+                .description("Desc")
+                .build();
+        
+        ExampleRequest request3 = ExampleRequest.builder()
+                .name("Different")
+                .description("Desc")
+                .build();
+
+        // Then
+        assertEquals(request1, request2);
+        assertEquals(request1.hashCode(), request2.hashCode());
+        assertNotEquals(request1, request3);
+        assertNotEquals(request1, null);
+        assertNotEquals(request1, new Object());
+    }
+
+    @Test
+    void shouldTestToString() {
+        // Given
+        ExampleRequest request = ExampleRequest.builder()
+                .name("Test Name")
+                .description("Test Description")
+                .build();
+
+        // When
+        String toString = request.toString();
+
+        // Then
+        assertNotNull(toString);
+        assertTrue(toString.contains("Test Name") || toString.contains("name=Test Name"));
+    }
 }
 
