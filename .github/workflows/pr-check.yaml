@@ -35,6 +35,7 @@ jobs:
             refactor
             test
             chore
+            build
           scopes: |
             api
             db
@@ -44,9 +45,19 @@ jobs:
           requireScope: false
           subjectPattern: ^(?![A-Z]).+$
           subjectPatternError: |
-            O título do PR deve começar com letra minúscula e seguir o padrão:
-            tipo(escopo): descrição
-            Exemplo: feat(api): adiciona endpoint de usuários
+            O título do PR deve seguir o padrão: tipo(escopo): descrição
+            
+            Tipos permitidos: feat, fix, docs, style, refactor, test, chore, build
+            Escopos permitidos: api, db, config, docker, ci
+            
+            Exemplos válidos:
+            - test(ci): valida workflow consolidado
+            - feat(api): adiciona endpoint de usuários
+            - fix(db): corrige migração de dados
+            - build(deps): atualiza dependências
+            
+            ❌ Título atual: "Test/single workflow run"
+            ✅ Título correto: "test(ci): valida workflow consolidado - apenas 1 run por PR"
 
       - name: Check for secrets
         run: |
@@ -84,14 +95,8 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-    uses: ./.github/workflows/run-tests-reusable.yaml
-    with:
-      java-version: "17"
-
-  build-and-test:
-    name: Build and Test
-    runs-on: ubuntu-latest
-    needs: [validate, test]
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -104,22 +109,62 @@ jobs:
           distribution: "temurin"
           cache: "maven"
 
-      - name: Build application
-        run: mvn clean package -DskipTests
+      - name: Run tests
+        run: mvn clean test
 
-      - name: Check code coverage
+      - name: Generate test report
+        if: always()
+        run: mvn surefire-report:report
+        continue-on-error: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: target/surefire-reports/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    needs: [validate, test]
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: "maven"
+
+      - name: Run tests with coverage
+        run: mvn clean test
+
+      - name: Generate coverage report
         run: mvn jacoco:report
 
       - name: Check coverage threshold
         run: |
-          # Verifica se a cobertura está acima de 70%
-          if mvn jacoco:check -Djacoco.minLineCoverage=0.70 -Djacoco.minBranchCoverage=0.70; then
+          # Executa o check do JaCoCo usando a configuração do pom.xml
+          # O check precisa ser executado após o report ter sido gerado
+          if mvn jacoco:check; then
             echo "✅ Cobertura de testes OK (>= 70%)"
           else
             echo "❌ Cobertura de testes abaixo de 70%"
             echo "Por favor, adicione mais testes antes de fazer merge"
             exit 1
           fi
+
+      - name: Build application
+        run: mvn package -DskipTests
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
