@@ -11,7 +11,7 @@ on:
 jobs:
   test:
     name: Run Tests
-    uses: ./.github/workflows/reusable/run-tests.yaml
+    uses: ./.github/workflows/run-tests-reusable.yaml
     with:
       java-version: "17"
 

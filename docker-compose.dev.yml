@@ -25,7 +25,7 @@ services:
       [
         "/bin/bash",
         "-c",
-        "chmod +x /wait-for-db.sh && /wait-for-db.sh && ./mvnw spring-boot:run || mvn spring-boot:run",
+        "chmod +x /wait-for-db.sh && /wait-for-db.sh && rm -rf ~/.m2/repository/org/flywaydb/flyway-database-sqlserver && ./mvnw clean spring-boot:run -U || mvn clean spring-boot:run -U",
       ]
     networks:
       - dev-network

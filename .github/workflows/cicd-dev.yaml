@@ -21,7 +21,7 @@ env:
 jobs:
     build:
         name: Build and Push Image
-        uses: ./.github/workflows/reusable/build-and-push.yaml
+        uses: ./.github/workflows/build-and-push-reusable.yaml
         with:
             java-version: "17"
             registry: ghcr.io
