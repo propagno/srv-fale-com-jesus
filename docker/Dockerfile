@@ -1,6 +1,5 @@
 # Multi-stage build para otimizar tamanho da imagem
-FROM eclipse-temurin:17-jdk-jammy as builder
-ARG PACKAGE_NAME
+FROM eclipse-temurin:17-jdk-jammy AS builder
 
 WORKDIR /app
 
@@ -17,8 +16,9 @@ RUN chmod +x mvnw
 RUN ./mvnw clean package -DskipTests
 
 # Extrai as camadas do Spring Boot
+# O nome do JAR é definido no pom.xml (artifactId)
 RUN mkdir -p /app/extracted && \
-    java -Djarmode=layertools -jar target/${PACKAGE_NAME}.jar extract --destination /app/extracted
+    java -Djarmode=layertools -jar target/srv-fale-com-jesus.jar extract --destination /app/extracted
 
 # Stage de runtime
 FROM eclipse-temurin:17-jre-jammy
