@@ -35,6 +35,7 @@ jobs:
             refactor
             test
             chore
+            build
           scopes: |
             api
             db
@@ -44,9 +45,19 @@ jobs:
           requireScope: false
           subjectPattern: ^(?![A-Z]).+$
           subjectPatternError: |
-            O título do PR deve começar com letra minúscula e seguir o padrão:
-            tipo(escopo): descrição
-            Exemplo: feat(api): adiciona endpoint de usuários
+            O título do PR deve seguir o padrão: tipo(escopo): descrição
+            
+            Tipos permitidos: feat, fix, docs, style, refactor, test, chore, build
+            Escopos permitidos: api, db, config, docker, ci
+            
+            Exemplos válidos:
+            - test(ci): valida workflow consolidado
+            - feat(api): adiciona endpoint de usuários
+            - fix(db): corrige migração de dados
+            - build(deps): atualiza dependências
+            
+            ❌ Título atual: "Test/single workflow run"
+            ✅ Título correto: "test(ci): valida workflow consolidado - apenas 1 run por PR"
 
       - name: Check for secrets
         run: |
@@ -134,15 +145,16 @@ jobs:
           distribution: "temurin"
           cache: "maven"
 
-      - name: Build application
-        run: mvn clean package -DskipTests
+      - name: Run tests with coverage
+        run: mvn clean test
 
-      - name: Check code coverage
+      - name: Generate coverage report
         run: mvn jacoco:report
 
       - name: Check coverage threshold
         run: |
-          # Executa o check usando a configuração do pom.xml
+          # Executa o check do JaCoCo usando a configuração do pom.xml
+          # O check precisa ser executado após o report ter sido gerado
           if mvn jacoco:check; then
             echo "✅ Cobertura de testes OK (>= 70%)"
           else
@@ -150,6 +162,9 @@ jobs:
             echo "Por favor, adicione mais testes antes de fazer merge"
             exit 1
           fi
+
+      - name: Build application
+        run: mvn package -DskipTests
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
