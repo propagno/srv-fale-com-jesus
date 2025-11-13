@@ -118,6 +118,9 @@ jobs:
     name: Deploy to Staging
     needs: [build, security-scan]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      statuses: write
     environment:
       name: staging
       url: http://staging.example.com

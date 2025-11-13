@@ -128,6 +128,9 @@ jobs:
     name: Deploy to Production
     needs: [build, security-scan]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      statuses: write
     environment:
       name: production
       url: http://prod.example.com

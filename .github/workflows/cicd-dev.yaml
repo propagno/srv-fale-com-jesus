@@ -38,6 +38,9 @@ jobs:
         name: Deploy to Development
         needs: build
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            statuses: write
         environment:
             name: development
             url: http://dev.example.com
