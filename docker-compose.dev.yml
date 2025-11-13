@@ -21,7 +21,12 @@ services:
       - ./docker/wait-for-db.sh:/wait-for-db.sh
     depends_on:
       - db-dev
-    entrypoint: ["/bin/bash", "-c", "chmod +x /wait-for-db.sh && /wait-for-db.sh && ./mvnw spring-boot:run || mvn spring-boot:run"]
+    entrypoint:
+      [
+        "/bin/bash",
+        "-c",
+        "chmod +x /wait-for-db.sh && /wait-for-db.sh && ./mvnw spring-boot:run || mvn spring-boot:run",
+      ]
     networks:
       - dev-network
     restart: unless-stopped
