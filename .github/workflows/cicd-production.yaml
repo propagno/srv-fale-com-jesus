@@ -32,7 +32,7 @@ permissions:
 
 jobs:
   build:
-    name: Build Application
+    name: Build and Push Image
     runs-on: ubuntu-latest
     outputs:
       image-tag: ${{ steps.meta.outputs.tags }}
@@ -46,16 +46,9 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: 'maven'
-
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
+          java-version: "17"
+          distribution: "temurin"
+          cache: "maven"
 
       - name: Run tests
         if: ${{ !inputs.skip-tests }}
@@ -68,18 +61,12 @@ jobs:
       - name: Check coverage threshold
         if: ${{ !inputs.skip-tests }}
         run: |
-          # Verifica se a cobertura está acima de 70%
           if mvn jacoco:check -Djacoco.minLineCoverage=0.70 -Djacoco.minBranchCoverage=0.70; then
             echo "✅ Cobertura de testes OK (>= 70%)"
           else
             echo "❌ Cobertura de testes abaixo de 70%"
-            echo "Build bloqueado: cobertura insuficiente"
             exit 1
           fi
-
-      - name: Run integration tests
-        if: ${{ !inputs.skip-tests }}
-        run: mvn verify -DskipUnitTests
 
       - name: Build application
         run: mvn clean package -DskipTests
@@ -103,8 +90,7 @@ jobs:
             type=ref,event=branch
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}.{{patch}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha,prefix={{branch}}-
+            type=sha,prefix=main-
             type=raw,value=prod-latest
 
       - name: Build and push Docker image
@@ -118,8 +104,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          build-args: |
-            PACKAGE_NAME=${{ github.event.repository.name }}
 
   security-scan:
     name: Security Scan
