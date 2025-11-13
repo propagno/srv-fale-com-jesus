@@ -48,7 +48,7 @@ srv_fale_com_jesus
 
 4. Clique em **Connect**
 
-4. Se necessário, expanda **Databases** e procure por `srv_fale_com_jesus`
+5. Se necessário, expanda **Databases** e procure por `srv_fale_com_jesus`
 
 ## 🔍 Verificar se o Container está Rodando
 
