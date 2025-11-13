@@ -2,7 +2,7 @@
 
 Microsserviço base desenvolvido com Spring Boot, arquitetura hexagonal e integrado com as pipelines de infraestrutura.
 
-> **Nota**: Workflows de PR foram consolidados para melhorar eficiência do CI/CD.
+> **Nota**: Workflows de PR foram consolidados para melhorar eficiência do CI/CD. Cada PR agora executa apenas **1 workflow** em vez de 2.
 
 ## 📋 Tecnologias
 
