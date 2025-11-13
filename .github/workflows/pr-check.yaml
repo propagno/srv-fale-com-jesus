@@ -83,9 +83,36 @@ jobs:
 
   test:
     name: Run Tests
-    uses: ./.github/workflows/run-tests-reusable.yaml
-    with:
-      java-version: "17"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
+          cache: "maven"
+
+      - name: Run tests
+        run: mvn clean test
+
+      - name: Generate test report
+        if: always()
+        run: mvn surefire-report:report
+        continue-on-error: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: target/surefire-reports/
+          retention-days: 7
 
   build-and-test:
     name: Build and Test
