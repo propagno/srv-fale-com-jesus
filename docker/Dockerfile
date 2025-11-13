@@ -10,6 +10,9 @@ COPY .mvn .mvn
 COPY mvnw .
 COPY src ./src
 
+# Dá permissão de execução ao mvnw
+RUN chmod +x mvnw
+
 # Build da aplicação
 RUN ./mvnw clean package -DskipTests
 
