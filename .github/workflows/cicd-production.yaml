@@ -61,6 +61,22 @@ jobs:
         if: ${{ !inputs.skip-tests }}
         run: mvn clean test
 
+      - name: Check code coverage
+        if: ${{ !inputs.skip-tests }}
+        run: mvn jacoco:report
+
+      - name: Check coverage threshold
+        if: ${{ !inputs.skip-tests }}
+        run: |
+          # Verifica se a cobertura está acima de 70%
+          if mvn jacoco:check -Djacoco.minLineCoverage=0.70 -Djacoco.minBranchCoverage=0.70; then
+            echo "✅ Cobertura de testes OK (>= 70%)"
+          else
+            echo "❌ Cobertura de testes abaixo de 70%"
+            echo "Build bloqueado: cobertura insuficiente"
+            exit 1
+          fi
+
       - name: Run integration tests
         if: ${{ !inputs.skip-tests }}
         run: mvn verify -DskipUnitTests
