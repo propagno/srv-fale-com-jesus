@@ -1,8 +1,8 @@
 package br.com.propagno.falecomjesus;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.SpringApplication;
-import org.springframework.context.ConfigurableApplicationContext;
+
+import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,27 +18,33 @@ class ApplicationTest {
     void applicationMainMethodExists() {
         // Verifica que o método main existe
         try {
-            Application.class.getDeclaredMethod("main", String[].class);
+            Method mainMethod = Application.class.getDeclaredMethod("main", String[].class);
+            assertNotNull(mainMethod);
+            assertTrue(java.lang.reflect.Modifier.isStatic(mainMethod.getModifiers()));
+            assertTrue(java.lang.reflect.Modifier.isPublic(mainMethod.getModifiers()));
         } catch (NoSuchMethodException e) {
             fail("Método main não encontrado");
         }
     }
 
     @Test
-    void shouldRunApplicationMainMethod() {
-        // Testa que o método main pode ser chamado
-        // Usa System.setSecurityManager para capturar System.exit se necessário
+    void shouldHaveCorrectAnnotations() {
+        // Verifica que a classe tem as anotações corretas
+        assertTrue(Application.class.isAnnotationPresent(org.springframework.boot.autoconfigure.SpringBootApplication.class));
+        assertTrue(Application.class.isAnnotationPresent(org.springframework.boot.autoconfigure.domain.EntityScan.class));
+        assertTrue(Application.class.isAnnotationPresent(org.springframework.data.jpa.repository.config.EnableJpaRepositories.class));
+    }
+
+    @Test
+    void shouldHaveMainMethodWithCorrectSignature() {
+        // Verifica assinatura do método main
         try {
-            // Simula chamada do main com argumentos vazios
-            // Não executa realmente para não iniciar o servidor
-            String[] args = new String[0];
-            // Apenas verifica que o método existe e pode ser invocado
-            assertDoesNotThrow(() -> {
-                var method = Application.class.getDeclaredMethod("main", String[].class);
-                assertNotNull(method);
-            });
-        } catch (Exception e) {
-            fail("Erro ao verificar método main: " + e.getMessage());
+            Method mainMethod = Application.class.getDeclaredMethod("main", String[].class);
+            assertEquals(void.class, mainMethod.getReturnType());
+            assertEquals(1, mainMethod.getParameterCount());
+            assertEquals(String[].class, mainMethod.getParameterTypes()[0]);
+        } catch (NoSuchMethodException e) {
+            fail("Método main não encontrado");
         }
     }
 }
