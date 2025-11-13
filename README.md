@@ -27,8 +27,6 @@ O script irá:
 - ✅ Verificar conectividade com banco
 - ✅ Fazer build do projeto
 
-📖 **Guia completo:** Veja [QUICKSTART.md](QUICKSTART.md)
-
 ### Setup Manual
 
 1. **Clone e configure:**
@@ -82,7 +80,11 @@ src/main/java/br/com/propagno/falecomjesus/
     └── input/rest/          # Controllers REST
 ```
 
-📖 **Detalhes:** Veja [ARCHITECTURE.md](ARCHITECTURE.md)
+**Princípios:**
+- **Domain**: Sem dependências externas, apenas lógica de negócio
+- **Application**: Depende apenas do Domain, define interfaces (Ports)
+- **Infrastructure**: Implementa Ports de saída (persistência, integrações)
+- **Adapters**: Implementa Ports de entrada (REST, CLI, etc.)
 
 ## 🗄️ Banco de Dados
 
@@ -95,7 +97,15 @@ O banco de dados é gerenciado pelo repositório **db-propagno**.
 - User: `sa`
 - Password: Configurada em `.env.dev`
 
-📖 **Detalhes:** Veja [DATABASE-CONNECTION.md](DATABASE-CONNECTION.md)
+**JDBC URL:**
+```
+jdbc:sqlserver://${DB_HOST}:${DB_PORT};databaseName=${DB_NAME};encrypt=true;trustServerCertificate=true
+```
+
+**Importante:**
+- O banco deve estar rodando antes de iniciar este serviço
+- Migrations são gerenciadas pelo `db-propagno` com Liquibase
+- Este serviço não executa migrations (Flyway desabilitado)
 
 ## 🔄 CI/CD
 
@@ -122,10 +132,6 @@ O banco de dados é gerenciado pelo repositório **db-propagno**.
 
 ## 📝 Desenvolvimento
 
-### Checklist Antes de PR
-
-Consulte [CHECKLIST-DESENVOLVEDOR.md](CHECKLIST-DESENVOLVEDOR.md) para garantir que seu PR está completo.
-
 ### Convenção de Commits
 
 ```
@@ -150,21 +156,67 @@ chore: manutenção
 ./mvnw jacoco:check
 ```
 
+### Checklist Antes de PR
+
+- [ ] Testes passam (`./mvnw test`)
+- [ ] Cobertura de testes >= 70%
+- [ ] Build funciona (`./mvnw clean package`)
+- [ ] Docker build funciona
+- [ ] Nenhum arquivo `.env` no commit
+- [ ] Mensagem de commit segue a convenção
+- [ ] Documentação atualizada (se necessário)
+- [ ] Código segue os padrões do projeto
+- [ ] Arquitetura hexagonal respeitada
+
 ## 🐛 Troubleshooting
 
-Consulte [TROUBLESHOOTING.md](TROUBLESHOOTING.md) para resolução de problemas comuns.
+### Erro: "Cannot connect to database"
 
-## 📚 Documentação
+```bash
+# Verifique se o banco está rodando
+docker ps | grep db-dev
 
-- **[QUICKSTART.md](QUICKSTART.md)** - Início rápido
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Arquitetura hexagonal
-- **[DATABASE-CONNECTION.md](DATABASE-CONNECTION.md)** - Conexão com banco
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Guia de contribuição
-- **[CHECKLIST-DESENVOLVEDOR.md](CHECKLIST-DESENVOLVEDOR.md)** - Checklist para PRs
-- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Resolução de problemas
-- **[DEPLOY-INFO.md](DEPLOY-INFO.md)** - Informações sobre deploy
-- **[REFINAMENTO-TECNICO.md](REFINAMENTO-TECNICO.md)** - Análise técnica
-- **[RESUMO-REFINAMENTO.md](RESUMO-REFINAMENTO.md)** - Resumo das melhorias
+# Se não estiver, inicie:
+cd ../db-propagno
+docker-compose up -d db-dev
+./scripts/init.sh dev
+```
+
+### Erro: "Port 8080 already in use"
+
+```bash
+# Altere a porta no .env.dev
+SERVER_PORT=8081
+```
+
+### Erro: "Maven not found"
+
+```bash
+# Use o wrapper incluído
+./mvnw spring-boot:run
+```
+
+### Erro: "Network db-propagno-network not found"
+
+```bash
+# Crie a network manualmente
+docker network create db-propagno-network
+
+# Ou inicie o banco primeiro (ele criará a network)
+cd ../db-propagno
+docker-compose up -d db-dev
+```
+
+### Erro: "Dependency resolution failed"
+
+```bash
+# Limpe o cache do Maven
+./mvnw clean
+rm -rf ~/.m2/repository
+
+# Force update
+./mvnw clean install -U
+```
 
 ## 🔒 Segurança
 
@@ -173,14 +225,33 @@ Consulte [TROUBLESHOOTING.md](TROUBLESHOOTING.md) para resolução de problemas 
 - ✅ Validação de secrets em PRs
 - ✅ Pre-commit hooks para validação
 - ✅ Coverage mínimo de 70%
+- ✅ Nenhum secret hardcoded
+- ✅ Inputs validados
+- ✅ SQL injection prevenido (JPA/PreparedStatements)
+
+## 📚 Contribuindo
+
+1. Fork o repositório
+2. Crie uma branch: `git checkout -b feature/minha-feature`
+3. Desenvolva seguindo a arquitetura hexagonal
+4. Escreva testes (cobertura >= 70%)
+5. Commit: `git commit -m "feat: adiciona funcionalidade X"`
+6. Push: `git push origin feature/minha-feature`
+7. Abra um Pull Request
+
+**O que NÃO fazer:**
+- ❌ Commitar secrets ou senhas
+- ❌ Commitar arquivos .env
+- ❌ Quebrar testes existentes
+- ❌ Ignorar feedback de code review
+- ❌ Criar PRs muito grandes (divida em PRs menores)
 
 ## 🎯 Próximos Passos
 
 1. Execute o setup: `./scripts/setup.sh`
-2. Leia o [QUICKSTART.md](QUICKSTART.md)
-3. Desenvolva suas features
-4. Siga o [CHECKLIST-DESENVOLVEDOR.md](CHECKLIST-DESENVOLVEDOR.md)
-5. Crie seu PR!
+2. Desenvolva suas features
+3. Siga o checklist antes de criar PR
+4. Crie seu PR!
 
 ---
 

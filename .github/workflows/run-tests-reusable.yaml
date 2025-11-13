@@ -4,10 +4,10 @@ on:
   workflow_call:
     inputs:
       java-version:
-        description: 'Java version to use'
+        description: "Java version to use"
         required: false
         type: string
-        default: '17'
+        default: "17"
 
 jobs:
   test:
@@ -24,8 +24,8 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: ${{ inputs.java-version || '17' }}
-          distribution: 'temurin'
-          cache: 'maven'
+          distribution: "temurin"
+          cache: "maven"
 
       - name: Run tests
         run: mvn clean test
