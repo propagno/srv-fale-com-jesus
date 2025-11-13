@@ -46,9 +46,12 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     enabled: true
+  packages-to-scan: br.com.propagno.falecomjesus.adapter.input.rest.controller
 
 logging:
   level:
     root: INFO
-    br.com.propagno: DEBUG
+    br.com.propagno.falecomjesus: DEBUG
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
 
