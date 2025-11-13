@@ -5,6 +5,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
+/**
+ * Classe principal da aplicação Fale com Jesus.
+ * 
+ * @author Propagno
+ * @version 1.0.0
+ */
 @SpringBootApplication(scanBasePackages = "br.com.propagno.falecomjesus")
 @EntityScan("br.com.propagno.falecomjesus.infrastructure.persistence.entity")
 @EnableJpaRepositories("br.com.propagno.falecomjesus.infrastructure.persistence.repository")
