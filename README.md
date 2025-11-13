@@ -2,6 +2,8 @@
 
 Microsserviço base desenvolvido com Spring Boot, arquitetura hexagonal e integrado com as pipelines de infraestrutura.
 
+> **Nota**: Workflows de PR foram consolidados para melhorar eficiência do CI/CD.
+
 ## 📋 Tecnologias
 
 - **Java 17**
