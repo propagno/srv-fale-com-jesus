@@ -42,7 +42,11 @@ srv_fale_com_jesus
    - **Login:** `sa`
    - **Password:** `YourStrong@Passw0rd`
 
-3. Clique em **Connect**
+3. **IMPORTANTE:** Clique em **Options >>** (Opções) e na aba **Connection Properties** (Propriedades de Conexão):
+   - Marque a opção **"Trust server certificate"** (Confiar no certificado do servidor)
+   - Ou adicione na string de conexão: `TrustServerCertificate=True`
+
+4. Clique em **Connect**
 
 4. Se necessário, expanda **Databases** e procure por `srv_fale_com_jesus`
 
@@ -55,6 +59,19 @@ docker ps
 Você deve ver o container `db-dev` rodando na porta `1433`.
 
 ## ⚠️ Problemas Comuns
+
+### "A cadeia de certificação foi emitida por uma autoridade que não é de confiança"
+**Solução:**
+1. Na tela de conexão do SSMS, clique em **Options >>** (Opções)
+2. Vá para a aba **Connection Properties** (Propriedades de Conexão)
+3. Marque a opção **"Trust server certificate"** (Confiar no certificado do servidor)
+4. Tente conectar novamente
+
+**Alternativa (String de Conexão):**
+Se preferir usar string de conexão, adicione `TrustServerCertificate=True`:
+```
+Server=localhost,1433;Database=srv_fale_com_jesus;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+```
 
 ### "Cannot connect to server"
 - Verifique se o container está rodando: `docker ps`
