@@ -2,15 +2,88 @@ name: PR Check - Build and Test
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, ready_for_review]
     branches:
       - develop
       - main
       - staging
 
 jobs:
+  validate:
+    name: Validate PR Requirements
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate PR Title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            test
+            chore
+          scopes: |
+            api
+            db
+            config
+            docker
+            ci
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            O título do PR deve começar com letra minúscula e seguir o padrão:
+            tipo(escopo): descrição
+            Exemplo: feat(api): adiciona endpoint de usuários
+
+      - name: Check for secrets
+        run: |
+          echo "🔍 Verificando se há secrets no código..."
+          if grep -rE "(password|secret|token|api_key|apikey)\s*=\s*['\"][^'\"]+['\"]" --include="*.java" --include="*.yml" --include="*.yaml" --include="*.properties" src/ docker/ 2>/dev/null | grep -v "YourStrong@Passw0rd" | grep -v "example"; then
+            echo "⚠️  Possíveis secrets encontrados no código!"
+            echo "Por favor, remova secrets e use variáveis de ambiente"
+            exit 1
+          else
+            echo "✅ Nenhum secret encontrado"
+          fi
+
+      - name: Check for .env files
+        run: |
+          echo "🔍 Verificando arquivos .env..."
+          if find . -name ".env*" -not -name ".env.example" | grep -q .; then
+            echo "❌ Arquivos .env encontrados no repositório!"
+            echo "Por favor, remova arquivos .env e use apenas .env.example"
+            exit 1
+          else
+            echo "✅ Nenhum arquivo .env encontrado"
+          fi
+
+      - name: Validate Dockerfile
+        run: |
+          echo "🔍 Validando Dockerfile..."
+          if [ -f "docker/Dockerfile" ]; then
+            if grep -iE "(password|secret|token)" docker/Dockerfile | grep -v "#" | grep -v "ENV"; then
+              echo "⚠️  Possíveis secrets no Dockerfile!"
+              exit 1
+            fi
+            echo "✅ Dockerfile validado"
+          fi
+
   test:
     name: Run Tests
+    runs-on: ubuntu-latest
     uses: ./.github/workflows/run-tests-reusable.yaml
     with:
       java-version: "17"
@@ -18,7 +91,7 @@ jobs:
   build-and-test:
     name: Build and Test
     runs-on: ubuntu-latest
-    needs: test
+    needs: [validate, test]
 
     steps:
       - name: Checkout code
@@ -60,15 +133,33 @@ jobs:
           docker build -t app-test:${{ github.sha }} -f docker/Dockerfile .
         if: success()
 
-      - name: Comment PR
+      - name: Comment PR with results
         uses: actions/github-script@v7
         if: always()
         with:
           script: |
-            const status = '${{ job.status }}' === 'success' ? '✅' : '❌'
+            const validateStatus = '${{ needs.validate.result }}' === 'success' ? '✅' : '❌'
+            const testStatus = '${{ needs.test.result }}' === 'success' ? '✅' : '❌'
+            const buildStatus = '${{ job.status }}' === 'success' ? '✅' : '❌'
+            
+            const body = `## PR Check - Resultados
+            
+            ### Validações
+            - Validação de título: ${validateStatus}
+            - Verificação de secrets: ${validateStatus}
+            - Verificação de .env: ${validateStatus}
+            - Validação de Dockerfile: ${validateStatus}
+            
+            ### Testes e Build
+            - Testes unitários: ${testStatus}
+            - Coverage >= 70%: ${buildStatus}
+            - Build da aplicação: ${buildStatus}
+            
+            ${buildStatus === '✅' && validateStatus === '✅' && testStatus === '✅' ? '✅ **Tudo OK! PR pronto para review.**' : '❌ **Por favor, corrija os problemas identificados antes de fazer merge.**'}`
+            
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## PR Check ${status}\n\nBuild e testes: ${status}`
+              body: body
             })
