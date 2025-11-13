@@ -1,5 +1,5 @@
 # Multi-stage build para otimizar tamanho da imagem
-FROM eclipse-temurin:17-jdk-jammy AS builder
+FROM eclipse-temurin:25-jdk-jammy AS builder
 
 WORKDIR /app
 
@@ -25,7 +25,7 @@ RUN mkdir -p /app/extracted && \
     java -Djarmode=layertools -jar target/srv-fale-com-jesus.jar extract --destination /app/extracted
 
 # Stage de runtime
-FROM eclipse-temurin:17-jre-jammy
+FROM eclipse-temurin:25-jre-jammy
 
 WORKDIR /app
 
