@@ -35,6 +35,7 @@ jobs:
             refactor
             test
             chore
+            build
           scopes: |
             api
             db
@@ -44,9 +45,19 @@ jobs:
           requireScope: false
           subjectPattern: ^(?![A-Z]).+$
           subjectPatternError: |
-            O título do PR deve começar com letra minúscula e seguir o padrão:
-            tipo(escopo): descrição
-            Exemplo: feat(api): adiciona endpoint de usuários
+            O título do PR deve seguir o padrão: tipo(escopo): descrição
+            
+            Tipos permitidos: feat, fix, docs, style, refactor, test, chore, build
+            Escopos permitidos: api, db, config, docker, ci
+            
+            Exemplos válidos:
+            - test(ci): valida workflow consolidado
+            - feat(api): adiciona endpoint de usuários
+            - fix(db): corrige migração de dados
+            - build(deps): atualiza dependências
+            
+            ❌ Título atual: "Test/single workflow run"
+            ✅ Título correto: "test(ci): valida workflow consolidado - apenas 1 run por PR"
 
       - name: Check for secrets
         run: |
