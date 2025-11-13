@@ -35,6 +35,7 @@ jobs:
             refactor
             test
             chore
+            build
           scopes: |
             api
             db
@@ -113,6 +114,7 @@ jobs:
           name: test-results
           path: target/surefire-reports/
           retention-days: 7
+          if-no-files-found: ignore
 
   build-and-test:
     name: Build and Test
