@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Instala dependências do sistema
 RUN apt-get update && \
-    apt-get install -y curl maven && \
+    apt-get install -y curl maven unixodbc-dev && \
     rm -rf /var/lib/apt/lists/*
 
 # Copia arquivos do projeto
