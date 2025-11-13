@@ -1,24 +1,20 @@
-name: Run Tests
+name: Run Tests (Reusable)
 
 on:
   workflow_call:
     inputs:
       java-version:
-        description: 'Java version'
+        description: 'Java version to use'
         required: false
         type: string
         default: '17'
-    outputs:
-      test-result:
-        description: 'Test execution result'
-        value: ${{ jobs.test.outputs.result }}
 
 jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-    outputs:
-      result: ${{ steps.test-status.outputs.result }}
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
@@ -27,29 +23,22 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          java-version: ${{ inputs.java-version }}
+          java-version: ${{ inputs.java-version || '17' }}
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
       - name: Run tests
-        id: test-status
-        run: |
-          if mvn clean test; then
-            echo "result=success" >> $GITHUB_OUTPUT
-          else
-            echo "result=failure" >> $GITHUB_OUTPUT
-            exit 1
-          fi
+        run: mvn clean test
 
       - name: Generate test report
         if: always()
-        run: mvn jacoco:report
+        run: mvn surefire-report:report
         continue-on-error: true
 
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: target/surefire-reports/
+          retention-days: 7

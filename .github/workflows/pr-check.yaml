@@ -38,6 +38,18 @@ jobs:
         run: mvn jacoco:report
         continue-on-error: true
 
+      - name: Check coverage threshold
+        run: |
+          # Verifica se a cobertura está acima de 70%
+          COVERAGE=$(mvn jacoco:check -Djacoco.minLineCoverage=0.70 -Djacoco.minBranchCoverage=0.70 2>&1 | grep -oP 'Coverage checks passed' || echo "FAILED")
+          if [ "$COVERAGE" = "FAILED" ]; then
+            echo "⚠️  Cobertura de testes abaixo de 70%"
+            echo "Por favor, adicione mais testes antes de fazer merge"
+          else
+            echo "✅ Cobertura de testes OK (>= 70%)"
+          fi
+        continue-on-error: true
+
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4
         if: always()

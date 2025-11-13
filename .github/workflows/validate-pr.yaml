@@ -1,0 +1,126 @@
+name: Validate Pull Request
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches:
+      - develop
+      - main
+      - staging
+
+jobs:
+  validate-pr:
+    name: Validate PR Requirements
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate PR Title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            test
+            chore
+          scopes: |
+            api
+            db
+            config
+            docker
+            ci
+          requireScope: false
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            O título do PR deve começar com letra minúscula e seguir o padrão:
+            tipo(escopo): descrição
+            Exemplo: feat(api): adiciona endpoint de usuários
+
+      - name: Check for secrets
+        run: |
+          echo "🔍 Verificando se há secrets no código..."
+          # Verifica padrões comuns de secrets
+          if grep -rE "(password|secret|token|api_key|apikey)\s*=\s*['\"][^'\"]+['\"]" --include="*.java" --include="*.yml" --include="*.yaml" --include="*.properties" src/ docker/ 2>/dev/null | grep -v "YourStrong@Passw0rd" | grep -v "example"; then
+            echo "⚠️  Possíveis secrets encontrados no código!"
+            echo "Por favor, remova secrets e use variáveis de ambiente"
+            exit 1
+          else
+            echo "✅ Nenhum secret encontrado"
+          fi
+
+      - name: Check for .env files
+        run: |
+          echo "🔍 Verificando arquivos .env..."
+          if find . -name ".env*" -not -name ".env.example" | grep -q .; then
+            echo "❌ Arquivos .env encontrados no repositório!"
+            echo "Por favor, remova arquivos .env e use apenas .env.example"
+            exit 1
+          else
+            echo "✅ Nenhum arquivo .env encontrado"
+          fi
+
+      - name: Validate Dockerfile
+        run: |
+          echo "🔍 Validando Dockerfile..."
+          if [ -f "docker/Dockerfile" ]; then
+            # Verifica se há secrets hardcoded
+            if grep -iE "(password|secret|token)" docker/Dockerfile | grep -v "#" | grep -v "ENV"; then
+              echo "⚠️  Possíveis secrets no Dockerfile!"
+              exit 1
+            fi
+            echo "✅ Dockerfile validado"
+          fi
+
+      - name: Check documentation
+        run: |
+          echo "🔍 Verificando documentação..."
+          REQUIRED_DOCS=("README.md" "QUICKSTART.md")
+          MISSING=0
+          for doc in "${REQUIRED_DOCS[@]}"; do
+            if [ ! -f "$doc" ]; then
+              echo "⚠️  Documento $doc não encontrado"
+              MISSING=1
+            fi
+          done
+          if [ $MISSING -eq 1 ]; then
+            echo "Por favor, adicione a documentação faltante"
+            exit 1
+          else
+            echo "✅ Documentação OK"
+          fi
+
+      - name: Comment PR with validation results
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          script: |
+            const status = '${{ job.status }}' === 'success' ? '✅' : '❌'
+            const body = `## Validação de PR ${status}
+            
+            - Validação de título: ${status}
+            - Verificação de secrets: ${status}
+            - Verificação de .env: ${status}
+            - Validação de Dockerfile: ${status}
+            - Verificação de documentação: ${status}
+            
+            ${status === '✅' ? 'Tudo OK! PR pronto para review.' : 'Por favor, corrija os problemas identificados.'}`
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            })
+
