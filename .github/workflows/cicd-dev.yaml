@@ -17,8 +17,6 @@ on:
 
 env:
     ENVIRONMENT: dev
-    REGISTRY: ghcr.io
-    IMAGE_NAME: ${{ github.repository }}
 
 jobs:
     build:
@@ -26,8 +24,8 @@ jobs:
         uses: ./.github/workflows/reusable/build-and-push.yaml
         with:
             java-version: "17"
-            registry: ${{ env.REGISTRY }}
-            image-name: ${{ env.IMAGE_NAME }}
+            registry: ghcr.io
+            image-name: ${{ github.repository }}
             dockerfile-path: ./docker/Dockerfile
             package-name: ${{ github.event.repository.name }}
             tag-suffix: dev-latest
