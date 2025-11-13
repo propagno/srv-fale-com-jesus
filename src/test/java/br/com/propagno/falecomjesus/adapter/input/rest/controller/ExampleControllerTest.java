@@ -114,7 +114,6 @@ class ExampleControllerTest {
     void shouldDeleteExample() {
         // Given
         doNothing().when(exampleUseCase).deleteById(1L);
-        when(exampleUseCase.findById(1L)).thenReturn(Optional.of(exampleEntity));
 
         // When
         ResponseEntity<Void> response = exampleController.delete(1L);
